@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import {checkDependencies, generateReport} from "./src/index.js";
+import {checkDependencies, generateReport} from "../src/index.js";
 
 
 exec('npm ls --json', async (err, stdout, stderr) => {

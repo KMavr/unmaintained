@@ -1,12 +1,28 @@
 {
   "name": "unmaintained",
   "version": "1.0.0",
-  "description": "",
+  "description": "A tool to check for unmaintained packages in a JS project",
   "main": "index.js",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "bin": {
+    "unmaintained": "./bin/unmaintained.js"
   },
-  "author": "Konstantinos Mavrikas",
-  "license": "MIT"
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:KMavr/unmaintained.git"
+  },
+  "keywords": [
+    "unmaintained",
+    "dependencies",
+    "npm"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KMavr/unmaintained/issues"
+  },
+  "homepage": "https://github.com/KMavr/unmaintained#readme"
 }
