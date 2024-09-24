@@ -8,7 +8,9 @@ function generateReport(tree, parent = null, path = []) {
                 report += `Dependency Path: ${currentPath.join(' -> ')}\n`;
                 report += `Unmaintained For: ${info.unmaintainedYears} years\n\n`;
             }
-            report += generateReport(info.dependencies, packageName, currentPath);
+            if(Object.keys(info.dependencies).length) {
+                report += generateReport(info.dependencies, packageName, currentPath);
+            }
         }
     }
     return report ? report : 'No unmaintained dependencies found.';
