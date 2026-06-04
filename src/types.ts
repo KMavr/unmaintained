@@ -42,6 +42,7 @@ export interface PackageData {
   deprecated: string | null;
   repositoryUrl: string | null;
   archived: boolean | null;
+  topics: string[];
 }
 
 export interface Sources {

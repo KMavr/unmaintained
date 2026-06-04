@@ -1,9 +1,10 @@
 import { archivedCheck } from './checks/hard/archived.js';
 import { deprecatedCheck } from './checks/hard/deprecated.js';
+import { unmaintainedTopicCheck } from './checks/hard/unmaintainedTopic.js';
 import type { DirectDependency } from './lib/directDependencies.js';
 import type { Finding, Reason, Sources } from './types.js';
 
-const HARD_CHECKS = [deprecatedCheck, archivedCheck];
+const HARD_CHECKS = [deprecatedCheck, archivedCheck, unmaintainedTopicCheck];
 
 export const analyze = async (dep: DirectDependency, sources: Sources): Promise<Finding> => {
   const data = await sources.fetchPackage(dep.name);
