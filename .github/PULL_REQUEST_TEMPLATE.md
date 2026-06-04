@@ -15,5 +15,5 @@
 - [ ] Tests added/updated and `npm test -- --run` passes
 - [ ] `npm run lint`, `npm run typecheck`, and `npm run format:check` pass
 - [ ] Commit messages follow Conventional Commits
-- [ ] If a signal, data source, or tier changed, added coverage with injected source fakes (no network in tests)
+- [ ] If a check, data source, or tier changed, added coverage with injected source fakes (no network in tests)
 - [ ] Updated the README if a flag, exit code, signal, or the `--json` output shape changed
