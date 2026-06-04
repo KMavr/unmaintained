@@ -40,6 +40,8 @@ export interface PackageData {
   name: string;
   latestVersion: string | null;
   deprecated: string | null;
+  repositoryUrl: string | null;
+  archived: boolean | null;
 }
 
 export interface Sources {
