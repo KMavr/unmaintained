@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createRequire } from 'node:module';
 import { Command } from 'commander';
-import { run } from './run.js';
+import run from './run.js';
 
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json') as { version: string };
@@ -15,8 +15,8 @@ program
   )
   .version(pkg.version)
   .argument('[path]', 'project directory to scan', '.')
-  .option('--strict', 'exit non-zero when any unmaintained (hard-signal) packages are found', false)
-  .option('--soft', 'also report the "probably unmaintained" tier from heuristic signals', false)
+  .option('--strict', 'exit non-zero when any unmaintained (hard-check) packages are found', false)
+  .option('--soft', 'also report the "probably unmaintained" tier from heuristic checks', false)
   .option('--transitive', 'scan the full dependency tree, not just direct dependencies', false)
   .option('--depth <n>', 'limit transitive scanning to this depth', (v) => Number.parseInt(v, 10))
   .option('--production', 'scan only "dependencies" (skip devDependencies)', false)

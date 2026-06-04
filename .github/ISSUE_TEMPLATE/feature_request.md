@@ -20,4 +20,4 @@ assignees: ''
 
 ## Alternatives considered
 
-<!-- Other ways to solve this, or why the existing signals and flags don't cover it. -->
+<!-- Other ways to solve this, or why the existing checks and flags don't cover it. -->

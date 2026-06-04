@@ -1,8 +1,29 @@
+import { analyze } from './analyze.js';
+import { directDependencies } from './lib/directDependencies.js';
+import type { DirectDependency } from './lib/directDependencies.js';
+import { PackageJsonError, readPackageJson } from './lib/readPackageJson.js';
+import { renderHuman } from './report/renderHuman.js';
+import { defaultSources } from './sources/index.js';
 import type { RunOptions } from './types.js';
 
 async function run(options: RunOptions): Promise<number> {
-  console.log(`unmaintained: would scan ${options.cwd} (not yet implemented)`);
-  return 0;
+  try {
+    const packageJson = await readPackageJson(options.cwd);
+    const dependencies = directDependencies(packageJson, !options.production);
+    const findings = await Promise.all(
+      dependencies.map((dep: DirectDependency) => analyze(dep, defaultSources)),
+    );
+
+    console.log(renderHuman(findings));
+
+    return options.strict && findings.some((f) => f.tier === 'unmaintained') ? 1 : 0;
+  } catch (error) {
+    if (error instanceof PackageJsonError) {
+      console.error(error.message);
+      return 2;
+    }
+    throw error;
+  }
 }
 
-export { run };
+export default run;
