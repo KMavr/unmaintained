@@ -41,4 +41,20 @@ describe('analyze', () => {
     );
     expect(finding.version).toBe('^1.3.0');
   });
+
+  it('should flag an archived (non-deprecated) package as unmaintained', async () => {
+    const finding = await analyze(
+      dep,
+      fakeSources({
+        name: 'left-pad',
+        latestVersion: '1.3.0',
+        deprecated: null,
+        repositoryUrl: 'https://github.com/foo/bar',
+        archived: true,
+      }),
+    );
+    expect(finding.tier).toBe('unmaintained');
+    expect(finding.reasons).toHaveLength(1);
+    expect(finding.reasons[0]).toMatchObject({ check: 'archived', confidence: 'hard' });
+  });
 });
