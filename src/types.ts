@@ -28,3 +28,10 @@ export interface RunOptions {
   json: boolean;
   token?: string;
 }
+
+export interface PackageJson {
+  name?: string;
+  version?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
