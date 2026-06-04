@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createRequire } from 'node:module';
 import { Command } from 'commander';
-import { run } from './run.js';
+import run from './run.js';
 
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json') as { version: string };

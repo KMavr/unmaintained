@@ -1,20 +1,22 @@
+import { analyze } from './analyze.js';
 import { directDependencies } from './lib/directDependencies.js';
 import type { DirectDependency } from './lib/directDependencies.js';
 import { PackageJsonError, readPackageJson } from './lib/readPackageJson.js';
+import { renderHuman } from './report/renderHuman.js';
+import { defaultSources } from './sources/index.js';
 import type { RunOptions } from './types.js';
 
 async function run(options: RunOptions): Promise<number> {
   try {
     const packageJson = await readPackageJson(options.cwd);
     const dependencies = directDependencies(packageJson, !options.production);
-
-    console.log(
-      `Found ${dependencies.length} direct ${dependencies.length === 1 ? 'dependency' : 'dependencies'} to check:`,
+    const findings = await Promise.all(
+      dependencies.map((dep: DirectDependency) => analyze(dep, defaultSources)),
     );
-    dependencies.forEach((dep: DirectDependency) => {
-      console.log(`  ${dep.name}@${dep.range}${dep.dev ? ' (dev)' : ''}`);
-    });
-    return 0;
+
+    console.log(renderHuman(findings));
+
+    return options.strict && findings.some((f) => f.tier === 'unmaintained') ? 1 : 0;
   } catch (error) {
     if (error instanceof PackageJsonError) {
       console.error(error.message);
@@ -24,4 +26,4 @@ async function run(options: RunOptions): Promise<number> {
   }
 }
 
-export { run };
+export default run;
