@@ -3,7 +3,7 @@ export type Tier = 'unmaintained' | 'probably' | 'maintained';
 export type Confidence = 'hard' | 'soft';
 
 export interface Reason {
-  signal: string;
+  check: string;
   detail: string;
   confidence: Confidence;
 }
@@ -34,4 +34,14 @@ export interface PackageJson {
   version?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+}
+
+export interface PackageData {
+  name: string;
+  latestVersion: string | null;
+  deprecated: string | null;
+}
+
+export interface Sources {
+  fetchPackage(name: string): Promise<PackageData>;
 }
