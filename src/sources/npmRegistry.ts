@@ -11,6 +11,7 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
       deprecated: null,
       repositoryUrl: null,
       archived: null,
+      topics: [],
     };
   }
 
@@ -30,5 +31,6 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
     deprecated,
     repositoryUrl: repoUrl ?? null,
     archived: null,
+    topics: [],
   };
 };

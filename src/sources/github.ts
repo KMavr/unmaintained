@@ -1,12 +1,17 @@
+export interface GitHubRepo {
+  archived: boolean;
+  topics: string[];
+}
+
 const parseRepo = (repositoryUrl: string): { owner: string; repo: string } | null => {
   const match = repositoryUrl.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
   return match ? { owner: match[1], repo: match[2] } : null;
 };
 
-export const fetchArchived = async (
+export const fetchGitHubRepo = async (
   repositoryUrl: string | null,
   token?: string,
-): Promise<boolean | null> => {
+): Promise<GitHubRepo | null> => {
   if (!repositoryUrl) {
     return null;
   }
@@ -29,6 +34,10 @@ export const fetchArchived = async (
     return null;
   }
 
-  const body = (await res.json()) as { archived?: boolean };
-  return body.archived ?? null;
+  const body = (await res.json()) as { archived?: boolean; topics?: string[] };
+
+  return {
+    archived: body.archived ?? false,
+    topics: body.topics ?? [],
+  };
 };
