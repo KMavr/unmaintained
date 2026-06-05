@@ -6,36 +6,35 @@ export interface SourceDiagnostics {
   gitHubRateLimited: number;
 }
 
-const fetchPerRepo = (urls: (string | null)[], diagnostics: SourceDiagnostics) =>
-  Promise.all(
-    urls.map(async (url) => {
-      try {
-        return await fetchGitHubRepo(url);
-      } catch (error) {
-        if (error instanceof GitHubRateLimitError) {
-          diagnostics.gitHubRateLimited += 1;
-          return null;
-        }
-        throw error;
-      }
-    }),
-  );
-
-const fetchBatched = async (
-  urls: (string | null)[],
+const countingRateLimit = async <T>(
   diagnostics: SourceDiagnostics,
-  token: string,
-) => {
+  count: number,
+  fallback: T,
+  fetchRepos: () => Promise<T>,
+): Promise<T> => {
   try {
-    return await fetchGitHubReposGraphQL(urls, token);
+    return await fetchRepos();
   } catch (error) {
     if (error instanceof GitHubRateLimitError) {
-      diagnostics.gitHubRateLimited += urls.filter(Boolean).length;
-      return urls.map(() => null);
+      diagnostics.gitHubRateLimited += count;
+      return fallback;
     }
     throw error;
   }
 };
+
+const fetchPerRepo = (urls: (string | null)[], diagnostics: SourceDiagnostics) =>
+  Promise.all(
+    urls.map((url) => countingRateLimit(diagnostics, 1, null, () => fetchGitHubRepo(url))),
+  );
+
+const fetchBatched = (urls: (string | null)[], diagnostics: SourceDiagnostics, token: string) =>
+  countingRateLimit(
+    diagnostics,
+    urls.filter(Boolean).length,
+    urls.map(() => null),
+    () => fetchGitHubReposGraphQL(urls, token),
+  );
 
 export const createDefaultSources = (
   token?: string,

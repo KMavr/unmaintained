@@ -5,6 +5,13 @@ export interface GitHubRepo {
 
 export class GitHubRateLimitError extends Error {}
 
+const throwIfRateLimited = (res: Response, message: string): void => {
+  const remaining = res.headers?.get?.('x-ratelimit-remaining');
+  if ((res.status === 403 || res.status === 429) && remaining === '0') {
+    throw new GitHubRateLimitError(message);
+  }
+};
+
 const parseRepo = (repositoryUrl: string): { owner: string; repo: string } | null => {
   const match = repositoryUrl.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
   return match ? { owner: match[1], repo: match[2] } : null;
@@ -33,11 +40,7 @@ export const fetchGitHubRepo = async (
   });
 
   if (!res.ok) {
-    const remaining = res.headers?.get?.('x-ratelimit-remaining');
-    if ((res.status === 403 || res.status === 429) && remaining === '0') {
-      throw new GitHubRateLimitError(`GitHub rate limit hit for ${parsed.owner}/${parsed.repo}`);
-    }
-
+    throwIfRateLimited(res, `GitHub rate limit hit for ${parsed.owner}/${parsed.repo}`);
     return null;
   }
 
@@ -83,11 +86,7 @@ export const fetchGitHubReposGraphQL = async (
   });
 
   if (!res.ok) {
-    const remaining = res.headers?.get?.('x-ratelimit-remaining');
-    if ((res.status === 403 || res.status === 429) && remaining === '0') {
-      throw new GitHubRateLimitError('GitHub GraphQL rate limit hit');
-    }
-
+    throwIfRateLimited(res, 'GitHub GraphQL rate limit hit');
     return repositoryUrls.map(() => null);
   }
 
@@ -100,7 +99,7 @@ export const fetchGitHubReposGraphQL = async (
   };
 
   if (json.errors?.some((e) => e.type === 'RATE_LIMITED')) {
-    throw new GitHubRateLimitError('GitHub GraphQL limit hit');
+    throw new GitHubRateLimitError('GitHub GraphQL rate limit hit');
   }
 
   return repositoryUrls.map((_url, index) => {
