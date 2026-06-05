@@ -4,7 +4,7 @@ import { unmaintainedTopicCheck } from './checks/hard/unmaintainedTopic.js';
 import { releaseCadenceCheck } from './checks/soft/releaseCadence.js';
 import { soloMaintainerCheck } from './checks/soft/soloMaintainer.js';
 import type { DirectDependency } from './lib/directDependencies.js';
-import type { Finding, Reason, Sources, Tier } from './types.js';
+import type { Finding, PackageData, Reason, Tier } from './types.js';
 
 const HARD_CHECKS = [deprecatedCheck, archivedCheck, unmaintainedTopicCheck];
 const SOFT_CHECKS = [releaseCadenceCheck, soloMaintainerCheck];
@@ -21,14 +21,12 @@ const getTier = (hardReasonsLength: number, softReasonsLength: number): Tier => 
 
 const isValidReason = (reason: Reason | null): reason is Reason => reason !== null;
 
-export const analyze = async (
+export const analyze = (
   dep: DirectDependency,
-  sources: Sources,
+  data: PackageData,
   soft: boolean = false,
   now: Date = new Date(),
-): Promise<Finding> => {
-  const data = await sources.fetchPackage(dep.name);
-
+): Finding => {
   const hardReasons = HARD_CHECKS.map((check) => check(data)).filter(isValidReason);
 
   const softReasons = soft

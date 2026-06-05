@@ -48,3 +48,69 @@ export const fetchGitHubRepo = async (
     topics: body.topics ?? [],
   };
 };
+
+export const fetchGitHubReposGraphQL = async (
+  repositoryUrls: (string | null)[],
+  token: string,
+): Promise<(GitHubRepo | null)[]> => {
+  const targets = repositoryUrls
+    .map((url, index) => ({
+      index,
+      parsed: url ? parseRepo(url) : null,
+    }))
+    .filter(
+      (target): target is { index: number; parsed: { owner: string; repo: string } } =>
+        target.parsed !== null,
+    );
+
+  if (targets.length === 0) {
+    return repositoryUrls.map(() => null);
+  }
+
+  const body = targets
+    .map(
+      ({ index, parsed }) =>
+        `r${index}: repository(owner: ${JSON.stringify(parsed.owner)}, name: ${JSON.stringify(parsed.repo)}) { isArchived repositoryTopics(first:20) { nodes { topic { name } } } }`,
+    )
+    .join('\n');
+
+  const query = `query { ${body} }`;
+
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!res.ok) {
+    const remaining = res.headers?.get?.('x-ratelimit-remaining');
+    if ((res.status === 403 || res.status === 429) && remaining === '0') {
+      throw new GitHubRateLimitError('GitHub GraphQL rate limit hit');
+    }
+
+    return repositoryUrls.map(() => null);
+  }
+
+  const json = (await res.json()) as {
+    data?: Record<
+      string,
+      { isArchived: boolean; repositoryTopics: { nodes: { topic: { name: string } }[] } } | null
+    >;
+    errors?: { type?: string }[];
+  };
+
+  if (json.errors?.some((e) => e.type === 'RATE_LIMITED')) {
+    throw new GitHubRateLimitError('GitHub GraphQL limit hit');
+  }
+
+  return repositoryUrls.map((_url, index) => {
+    const node = json.data?.[`r${index}`];
+
+    return node
+      ? {
+          archived: node.isArchived,
+          topics: node.repositoryTopics.nodes.map(({ topic }) => topic.name),
+        }
+      : null;
+  });
+};
