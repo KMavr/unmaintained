@@ -13,6 +13,7 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
       archived: null,
       topics: [],
       lastPublish: null,
+      maintainerCount: null,
     };
   }
 
@@ -21,12 +22,14 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
     versions?: Record<string, { deprecated?: string }>;
     repository?: string | { url?: string };
     time?: Record<string, string>;
+    maintainers?: Record<string, string>[];
   };
 
   const latestVersion = body['dist-tags']?.latest ?? null;
   const deprecated = latestVersion ? (body.versions?.[latestVersion]?.deprecated ?? null) : null;
   const repoUrl = typeof body.repository === 'string' ? body.repository : body.repository?.url;
   const lastPublish = latestVersion ? (body.time?.[latestVersion] ?? null) : null;
+  const maintainerCount = body.maintainers?.length ?? null;
 
   return {
     name,
@@ -36,5 +39,6 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
     archived: null,
     topics: [],
     lastPublish,
+    maintainerCount,
   };
 };
