@@ -48,5 +48,5 @@ export interface PackageData {
 }
 
 export interface Sources {
-  fetchPackage(name: string): Promise<PackageData>;
+  fetchPackages(names: string[]): Promise<PackageData[]>;
 }
