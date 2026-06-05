@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchGitHubRepo } from '../../src/sources/github.js';
+import { fetchGitHubRepo, GitHubRateLimitError } from '../../src/sources/github.js';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -42,8 +42,51 @@ describe('fetchGitHubRepo', () => {
     });
   });
 
-  it('should return null when the GitHub request fails', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+  it('should return null when the GitHub request fails for a non-rate-limit reason', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 404, headers: new Headers() }),
+    );
     expect(await fetchGitHubRepo('https://github.com/foo/bar')).toBeNull();
+  });
+
+  it('should return null for a 403 that is not a rate limit (e.g. private repo)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers({ 'x-ratelimit-remaining': '57' }),
+      }),
+    );
+    expect(await fetchGitHubRepo('https://github.com/foo/bar')).toBeNull();
+  });
+
+  it('should throw GitHubRateLimitError on a 403 with no remaining quota', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers({ 'x-ratelimit-remaining': '0' }),
+      }),
+    );
+    await expect(fetchGitHubRepo('https://github.com/foo/bar')).rejects.toBeInstanceOf(
+      GitHubRateLimitError,
+    );
+  });
+
+  it('should throw GitHubRateLimitError on a 429 with no remaining quota', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        headers: new Headers({ 'x-ratelimit-remaining': '0' }),
+      }),
+    );
+    await expect(fetchGitHubRepo('https://github.com/foo/bar')).rejects.toBeInstanceOf(
+      GitHubRateLimitError,
+    );
   });
 });
