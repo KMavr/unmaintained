@@ -12,7 +12,7 @@ async function run(options: RunOptions): Promise<number> {
     const dependencies = directDependencies(packageJson, !options.production);
     const defaultSources = createDefaultSources(options.token);
     const findings = await Promise.all(
-      dependencies.map((dep: DirectDependency) => analyze(dep, defaultSources)),
+      dependencies.map((dep: DirectDependency) => analyze(dep, defaultSources, options.soft)),
     );
 
     console.log(renderHuman(findings));

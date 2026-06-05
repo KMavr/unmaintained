@@ -43,6 +43,7 @@ export interface PackageData {
   repositoryUrl: string | null;
   archived: boolean | null;
   topics: string[];
+  lastPublish: string | null;
 }
 
 export interface Sources {
