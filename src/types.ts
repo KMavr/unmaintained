@@ -44,6 +44,7 @@ export interface PackageData {
   archived: boolean | null;
   topics: string[];
   lastPublish: string | null;
+  maintainerCount: number | null;
 }
 
 export interface Sources {

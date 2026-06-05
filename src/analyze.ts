@@ -2,11 +2,12 @@ import { archivedCheck } from './checks/hard/archived.js';
 import { deprecatedCheck } from './checks/hard/deprecated.js';
 import { unmaintainedTopicCheck } from './checks/hard/unmaintainedTopic.js';
 import { releaseCadenceCheck } from './checks/soft/releaseCadence.js';
+import { soloMaintainerCheck } from './checks/soft/soloMaintainer.js';
 import type { DirectDependency } from './lib/directDependencies.js';
 import type { Finding, Reason, Sources, Tier } from './types.js';
 
 const HARD_CHECKS = [deprecatedCheck, archivedCheck, unmaintainedTopicCheck];
-const SOFT_CHECKS = [releaseCadenceCheck];
+const SOFT_CHECKS = [releaseCadenceCheck, soloMaintainerCheck];
 
 const getTier = (hardReasonsLength: number, softReasonsLength: number): Tier => {
   if (hardReasonsLength > 0) {
