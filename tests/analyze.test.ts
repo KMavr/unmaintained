@@ -12,6 +12,7 @@ const packageData = (overrides: Partial<PackageData> = {}): PackageData => ({
   topics: [],
   lastPublish: '2024-01-01',
   maintainerCount: 2,
+  lastCommit: null,
   ...overrides,
 });
 

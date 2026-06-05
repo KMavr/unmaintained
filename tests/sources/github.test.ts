@@ -35,6 +35,7 @@ describe('fetchGitHubRepo', () => {
     expect(await fetchGitHubRepo('git+https://github.com/request/request.git')).toEqual({
       archived: true,
       topics: ['unmaintained'],
+      lastCommit: null,
     });
   });
 
@@ -43,6 +44,7 @@ describe('fetchGitHubRepo', () => {
     expect(await fetchGitHubRepo('https://github.com/foo/bar')).toEqual({
       archived: false,
       topics: [],
+      lastCommit: null,
     });
   });
 
@@ -95,8 +97,9 @@ describe('fetchGitHubRepo', () => {
   });
 });
 
-const graphQlNode = (archived: boolean, topics: string[]) => ({
+const graphQlNode = (archived: boolean, topics: string[], pushedAt: string | null = null) => ({
   isArchived: archived,
+  pushedAt,
   repositoryTopics: { nodes: topics.map((name) => ({ topic: { name } })) },
 });
 
@@ -117,7 +120,10 @@ describe('fetchGitHubReposGraphQL', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          data: { r0: graphQlNode(true, ['unmaintained']), r1: graphQlNode(false, ['cli']) },
+          data: {
+            r0: graphQlNode(true, ['unmaintained'], '2021-01-01T00:00:00Z'),
+            r1: graphQlNode(false, ['cli']),
+          },
         }),
       }),
     );
@@ -127,8 +133,8 @@ describe('fetchGitHubReposGraphQL', () => {
         'tok',
       ),
     ).toEqual([
-      { archived: true, topics: ['unmaintained'] },
-      { archived: false, topics: ['cli'] },
+      { archived: true, topics: ['unmaintained'], lastCommit: '2021-01-01T00:00:00Z' },
+      { archived: false, topics: ['cli'], lastCommit: null },
     ]);
   });
 
@@ -145,7 +151,11 @@ describe('fetchGitHubReposGraphQL', () => {
         ['https://github.com/a/b', null, 'https://github.com/c/d'],
         'tok',
       ),
-    ).toEqual([{ archived: true, topics: [] }, null, { archived: false, topics: [] }]);
+    ).toEqual([
+      { archived: true, topics: [], lastCommit: null },
+      null,
+      { archived: false, topics: [], lastCommit: null },
+    ]);
   });
 
   it('should yield null for a repository the query could not resolve', async () => {
@@ -158,7 +168,7 @@ describe('fetchGitHubReposGraphQL', () => {
     );
     expect(
       await fetchGitHubReposGraphQL(['https://github.com/a/b', 'https://github.com/c/d'], 'tok'),
-    ).toEqual([{ archived: true, topics: [] }, null]);
+    ).toEqual([{ archived: true, topics: [], lastCommit: null }, null]);
   });
 
   it('should throw GitHubRateLimitError on a 403 with no remaining quota', async () => {

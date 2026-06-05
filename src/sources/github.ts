@@ -1,6 +1,7 @@
 export interface GitHubRepo {
   archived: boolean;
   topics: string[];
+  lastCommit: string | null;
 }
 
 export class GitHubRateLimitError extends Error {}
@@ -44,11 +45,12 @@ export const fetchGitHubRepo = async (
     return null;
   }
 
-  const body = (await res.json()) as { archived?: boolean; topics?: string[] };
+  const body = (await res.json()) as { archived?: boolean; topics?: string[]; pushed_at?: string };
 
   return {
     archived: body.archived ?? false,
     topics: body.topics ?? [],
+    lastCommit: body.pushed_at ?? null,
   };
 };
 
@@ -73,7 +75,7 @@ export const fetchGitHubReposGraphQL = async (
   const body = targets
     .map(
       ({ index, parsed }) =>
-        `r${index}: repository(owner: ${JSON.stringify(parsed.owner)}, name: ${JSON.stringify(parsed.repo)}) { isArchived repositoryTopics(first:20) { nodes { topic { name } } } }`,
+        `r${index}: repository(owner: ${JSON.stringify(parsed.owner)}, name: ${JSON.stringify(parsed.repo)}) { isArchived pushedAt repositoryTopics(first:20) { nodes { topic { name } } } }`,
     )
     .join('\n');
 
@@ -93,7 +95,11 @@ export const fetchGitHubReposGraphQL = async (
   const json = (await res.json()) as {
     data?: Record<
       string,
-      { isArchived: boolean; repositoryTopics: { nodes: { topic: { name: string } }[] } } | null
+      {
+        isArchived: boolean;
+        pushedAt: string | null;
+        repositoryTopics: { nodes: { topic: { name: string } }[] };
+      } | null
     >;
     errors?: { type?: string }[];
   };
@@ -108,6 +114,7 @@ export const fetchGitHubReposGraphQL = async (
     return node
       ? {
           archived: node.isArchived,
+          lastCommit: node.pushedAt ?? null,
           topics: node.repositoryTopics.nodes.map(({ topic }) => topic.name),
         }
       : null;
