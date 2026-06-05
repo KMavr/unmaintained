@@ -45,6 +45,7 @@ export interface PackageData {
   topics: string[];
   lastPublish: string | null;
   maintainerCount: number | null;
+  lastCommit: string | null;
 }
 
 export interface Sources {

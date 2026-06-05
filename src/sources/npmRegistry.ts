@@ -14,6 +14,7 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
       topics: [],
       lastPublish: null,
       maintainerCount: null,
+      lastCommit: null,
     };
   }
 
@@ -40,5 +41,6 @@ export const fetchNpmPackage = async (name: string): Promise<PackageData> => {
     topics: [],
     lastPublish,
     maintainerCount,
+    lastCommit: null,
   };
 };

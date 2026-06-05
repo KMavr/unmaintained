@@ -52,6 +52,7 @@ export const createDefaultSources = (
       return npmResults.map((npm, i) => ({
         ...npm,
         archived: repos[i]?.archived ?? null,
+        lastCommit: repos[i]?.lastCommit ?? null,
         topics: repos[i]?.topics ?? [],
       }));
     },
