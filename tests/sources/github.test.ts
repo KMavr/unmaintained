@@ -36,6 +36,9 @@ describe('fetchGitHubRepo', () => {
       archived: true,
       topics: ['unmaintained'],
       lastCommit: null,
+      openIssues: null,
+      closedIssues: null,
+      repoCreatedAt: null,
     });
   });
 
@@ -45,6 +48,9 @@ describe('fetchGitHubRepo', () => {
       archived: false,
       topics: [],
       lastCommit: null,
+      openIssues: null,
+      closedIssues: null,
+      repoCreatedAt: null,
     });
   });
 
@@ -97,9 +103,19 @@ describe('fetchGitHubRepo', () => {
   });
 });
 
-const graphQlNode = (archived: boolean, topics: string[], pushedAt: string | null = null) => ({
+const graphQlNode = (
+  archived: boolean,
+  topics: string[],
+  pushedAt: string | null = null,
+  createdAt: string | null = null,
+  open = 0,
+  closed = 0,
+) => ({
   isArchived: archived,
   pushedAt,
+  createdAt,
+  openIssues: { totalCount: open },
+  closedIssues: { totalCount: closed },
   repositoryTopics: { nodes: topics.map((name) => ({ topic: { name } })) },
 });
 
@@ -121,7 +137,14 @@ describe('fetchGitHubReposGraphQL', () => {
         ok: true,
         json: async () => ({
           data: {
-            r0: graphQlNode(true, ['unmaintained'], '2021-01-01T00:00:00Z'),
+            r0: graphQlNode(
+              true,
+              ['unmaintained'],
+              '2021-01-01T00:00:00Z',
+              '2019-01-01T00:00:00Z',
+              30,
+              5,
+            ),
             r1: graphQlNode(false, ['cli']),
           },
         }),
@@ -133,8 +156,22 @@ describe('fetchGitHubReposGraphQL', () => {
         'tok',
       ),
     ).toEqual([
-      { archived: true, topics: ['unmaintained'], lastCommit: '2021-01-01T00:00:00Z' },
-      { archived: false, topics: ['cli'], lastCommit: null },
+      {
+        archived: true,
+        topics: ['unmaintained'],
+        lastCommit: '2021-01-01T00:00:00Z',
+        repoCreatedAt: '2019-01-01T00:00:00Z',
+        openIssues: 30,
+        closedIssues: 5,
+      },
+      {
+        archived: false,
+        topics: ['cli'],
+        lastCommit: null,
+        repoCreatedAt: null,
+        openIssues: 0,
+        closedIssues: 0,
+      },
     ]);
   });
 
@@ -152,9 +189,23 @@ describe('fetchGitHubReposGraphQL', () => {
         'tok',
       ),
     ).toEqual([
-      { archived: true, topics: [], lastCommit: null },
+      {
+        archived: true,
+        topics: [],
+        lastCommit: null,
+        repoCreatedAt: null,
+        openIssues: 0,
+        closedIssues: 0,
+      },
       null,
-      { archived: false, topics: [], lastCommit: null },
+      {
+        archived: false,
+        topics: [],
+        lastCommit: null,
+        repoCreatedAt: null,
+        openIssues: 0,
+        closedIssues: 0,
+      },
     ]);
   });
 
@@ -168,7 +219,17 @@ describe('fetchGitHubReposGraphQL', () => {
     );
     expect(
       await fetchGitHubReposGraphQL(['https://github.com/a/b', 'https://github.com/c/d'], 'tok'),
-    ).toEqual([{ archived: true, topics: [], lastCommit: null }, null]);
+    ).toEqual([
+      {
+        archived: true,
+        topics: [],
+        lastCommit: null,
+        repoCreatedAt: null,
+        openIssues: 0,
+        closedIssues: 0,
+      },
+      null,
+    ]);
   });
 
   it('should throw GitHubRateLimitError on a 403 with no remaining quota', async () => {

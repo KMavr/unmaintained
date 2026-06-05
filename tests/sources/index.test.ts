@@ -59,6 +59,10 @@ describe('createDefaultSources', () => {
               data: {
                 r0: {
                   isArchived: true,
+                  pushedAt: null,
+                  createdAt: null,
+                  openIssues: { totalCount: 0 },
+                  closedIssues: { totalCount: 0 },
                   repositoryTopics: { nodes: [{ topic: { name: 'unmaintained' } }] },
                 },
               },

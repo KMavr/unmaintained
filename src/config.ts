@@ -7,6 +7,10 @@ export interface Thresholds {
   staleIssueRatio: number;
   /** Soft: OpenSSF "Maintained" score at or below this floor counts against the package (0–10).*/
   scorecardMaintainedFloor: number;
+  /** Soft: minimum open+closed issues before the stale-backlog ratio is meaningful. */
+  staleIssuesFloor: number;
+  /** Soft: skip the stale-backlog check for repos younger than this many months. */
+  staleIssuesMinAgeMonths: number;
 }
 
 export const DEFAULT_THRESHOLDS: Thresholds = {
@@ -14,4 +18,6 @@ export const DEFAULT_THRESHOLDS: Thresholds = {
   cadenceYears: 2,
   staleIssueRatio: 0.9,
   scorecardMaintainedFloor: 2,
+  staleIssuesFloor: 20,
+  staleIssuesMinAgeMonths: 6,
 };

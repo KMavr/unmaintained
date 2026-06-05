@@ -1,4 +1,5 @@
 import { DEFAULT_THRESHOLDS } from '../../config.js';
+import { YEAR_MS } from '../../constants.js';
 import { PackageData, Reason } from '../../types.js';
 
 export const releaseCadenceCheck = (
@@ -11,7 +12,7 @@ export const releaseCadenceCheck = (
   }
 
   const published = new Date(data.lastPublish);
-  const ageYears = (now.getTime() - published.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+  const ageYears = (now.getTime() - published.getTime()) / YEAR_MS;
   if (ageYears < cadenceYears) {
     return null;
   }
