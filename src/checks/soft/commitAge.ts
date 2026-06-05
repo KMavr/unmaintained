@@ -1,4 +1,5 @@
 import { DEFAULT_THRESHOLDS } from '../../config.js';
+import { YEAR_MS } from '../../constants.js';
 import { PackageData, Reason } from '../../types.js';
 
 export const commitAgeCheck = (
@@ -11,7 +12,7 @@ export const commitAgeCheck = (
   }
 
   const pushed = new Date(data.lastCommit);
-  const ageYears = (now.getTime() - pushed.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+  const ageYears = (now.getTime() - pushed.getTime()) / YEAR_MS;
 
   if (ageYears < commitAgeYears) {
     return null;

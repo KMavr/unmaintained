@@ -54,6 +54,9 @@ export const createDefaultSources = (
         archived: repos[i]?.archived ?? null,
         lastCommit: repos[i]?.lastCommit ?? null,
         topics: repos[i]?.topics ?? [],
+        openIssues: repos[i]?.openIssues ?? null,
+        closedIssues: repos[i]?.closedIssues ?? null,
+        repoCreatedAt: repos[i]?.repoCreatedAt ?? null,
       }));
     },
   };

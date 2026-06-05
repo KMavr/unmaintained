@@ -2,6 +2,9 @@ export interface GitHubRepo {
   archived: boolean;
   topics: string[];
   lastCommit: string | null;
+  openIssues: number | null;
+  closedIssues: number | null;
+  repoCreatedAt: string | null;
 }
 
 export class GitHubRateLimitError extends Error {}
@@ -45,14 +48,59 @@ export const fetchGitHubRepo = async (
     return null;
   }
 
-  const body = (await res.json()) as { archived?: boolean; topics?: string[]; pushed_at?: string };
+  const body = (await res.json()) as {
+    archived?: boolean;
+    topics?: string[];
+    pushed_at?: string;
+    created_at?: string;
+  };
 
   return {
     archived: body.archived ?? false,
     topics: body.topics ?? [],
     lastCommit: body.pushed_at ?? null,
+    openIssues: null,
+    closedIssues: null,
+    repoCreatedAt: body?.created_at ?? null,
   };
 };
+
+const TOPICS_FIELDS = `
+  repositoryTopics(first: 20) {
+    nodes {
+      topic {
+        name
+      }
+    }
+  }
+`;
+
+const ISSUE_FIELDS = `
+  openIssues: issues(states: OPEN) {
+    totalCount
+  }
+
+  closedIssues: issues(states: CLOSED) {
+    totalCount
+  }
+`;
+
+const METADATA_FIELDS = `
+  isArchived
+  pushedAt
+  createdAt
+`;
+
+const REPOSITORY_FIELDS = [METADATA_FIELDS, TOPICS_FIELDS, ISSUE_FIELDS].join('\n');
+
+const buildRepositoryQuery = (alias: string, owner: string, repo: string): string => `
+  ${alias}: repository(
+    owner: ${JSON.stringify(owner)}
+    name: ${JSON.stringify(repo)}
+  ) {
+    ${REPOSITORY_FIELDS}
+  }
+`;
 
 export const fetchGitHubReposGraphQL = async (
   repositoryUrls: (string | null)[],
@@ -73,10 +121,7 @@ export const fetchGitHubReposGraphQL = async (
   }
 
   const body = targets
-    .map(
-      ({ index, parsed }) =>
-        `r${index}: repository(owner: ${JSON.stringify(parsed.owner)}, name: ${JSON.stringify(parsed.repo)}) { isArchived pushedAt repositoryTopics(first:20) { nodes { topic { name } } } }`,
-    )
+    .map(({ index, parsed }) => buildRepositoryQuery(`r${index}`, parsed.owner, parsed.repo))
     .join('\n');
 
   const query = `query { ${body} }`;
@@ -98,6 +143,9 @@ export const fetchGitHubReposGraphQL = async (
       {
         isArchived: boolean;
         pushedAt: string | null;
+        openIssues: { totalCount: number };
+        closedIssues: { totalCount: number };
+        createdAt: string | null;
         repositoryTopics: { nodes: { topic: { name: string } }[] };
       } | null
     >;
@@ -116,6 +164,9 @@ export const fetchGitHubReposGraphQL = async (
           archived: node.isArchived,
           lastCommit: node.pushedAt ?? null,
           topics: node.repositoryTopics.nodes.map(({ topic }) => topic.name),
+          repoCreatedAt: node.createdAt ?? null,
+          openIssues: node.openIssues.totalCount,
+          closedIssues: node.closedIssues.totalCount,
         }
       : null;
   });

@@ -46,6 +46,9 @@ export interface PackageData {
   lastPublish: string | null;
   maintainerCount: number | null;
   lastCommit: string | null;
+  openIssues: number | null;
+  closedIssues: number | null;
+  repoCreatedAt: string | null;
 }
 
 export interface Sources {

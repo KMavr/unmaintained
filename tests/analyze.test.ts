@@ -13,6 +13,9 @@ const packageData = (overrides: Partial<PackageData> = {}): PackageData => ({
   lastPublish: '2024-01-01',
   maintainerCount: 2,
   lastCommit: null,
+  openIssues: null,
+  closedIssues: null,
+  repoCreatedAt: null,
   ...overrides,
 });
 
