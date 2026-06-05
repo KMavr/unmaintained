@@ -10,6 +10,7 @@ const packageData = (overrides: Partial<PackageData> = {}): PackageData => ({
   repositoryUrl: null,
   archived: false,
   topics: [],
+  lastPublish: '2024-01-01',
   ...overrides,
 });
 
@@ -53,5 +54,40 @@ describe('analyze', () => {
     const finding = await analyze(dep, fakeSources(packageData({ topics: ['abandoned'] })));
     expect(finding.tier).toBe('unmaintained');
     expect(finding.reasons[0]).toMatchObject({ check: 'topic', confidence: 'hard' });
+  });
+
+  const now = new Date('2026-06-05T00:00:00Z');
+
+  it('should report a stale release as probably unmaintained when soft checks are enabled', async () => {
+    const finding = await analyze(
+      dep,
+      fakeSources(packageData({ lastPublish: '2020-01-01' })),
+      true,
+      now,
+    );
+    expect(finding.tier).toBe('probably');
+    expect(finding.reasons[0]).toMatchObject({ check: 'cadence', confidence: 'soft' });
+  });
+
+  it('should ignore soft signals unless --soft is enabled', async () => {
+    const finding = await analyze(
+      dep,
+      fakeSources(packageData({ lastPublish: '2020-01-01' })),
+      false,
+      now,
+    );
+    expect(finding.tier).toBe('maintained');
+    expect(finding.reasons).toEqual([]);
+  });
+
+  it('should let a hard signal win over a co-occurring soft signal', async () => {
+    const finding = await analyze(
+      dep,
+      fakeSources(packageData({ deprecated: 'use padStart', lastPublish: '2020-01-01' })),
+      true,
+      now,
+    );
+    expect(finding.tier).toBe('unmaintained');
+    expect(finding.reasons.map((reason) => reason.check)).toEqual(['deprecated', 'cadence']);
   });
 });
