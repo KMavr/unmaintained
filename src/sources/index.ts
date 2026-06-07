@@ -1,4 +1,5 @@
 import type { Sources } from '../types.js';
+import { fetchDepsDevScores } from './depsDev.js';
 import { fetchGitHubRepo, fetchGitHubReposGraphQL, GitHubRateLimitError } from './github.js';
 import { fetchNpmPackage } from './npmRegistry.js';
 
@@ -45,9 +46,10 @@ export const createDefaultSources = (
       const npmResults = await Promise.all(names.map(fetchNpmPackage));
       const urls = npmResults.map(({ repositoryUrl }) => repositoryUrl);
 
-      const repos = token
-        ? await fetchBatched(urls, diagnostics, token)
-        : await fetchPerRepo(urls, diagnostics);
+      const [repos, scores] = await Promise.all([
+        token ? fetchBatched(urls, diagnostics, token) : fetchPerRepo(urls, diagnostics),
+        fetchDepsDevScores(urls),
+      ]);
 
       return npmResults.map((npm, i) => ({
         ...npm,
@@ -57,6 +59,7 @@ export const createDefaultSources = (
         openIssues: repos[i]?.openIssues ?? null,
         closedIssues: repos[i]?.closedIssues ?? null,
         repoCreatedAt: repos[i]?.repoCreatedAt ?? null,
+        scorecardMaintained: scores[i],
       }));
     },
   };

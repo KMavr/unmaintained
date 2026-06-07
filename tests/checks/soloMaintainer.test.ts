@@ -15,20 +15,20 @@ const base: PackageData = {
 
 describe('soloMaintainerCheck', () => {
   it('should flag a package with exactly one maintainer', () => {
-    const reason = soloMaintainerCheck({ ...base, maintainerCount: 1 });
+    const reason = soloMaintainerCheck({ data: { ...base, maintainerCount: 1 } });
     expect(reason).toMatchObject({ check: 'solo-maintainer', confidence: 'soft' });
     expect(reason?.detail).toContain('left-pad');
   });
 
   it('should return null when there are multiple maintainers', () => {
-    expect(soloMaintainerCheck({ ...base, maintainerCount: 3 })).toBeNull();
+    expect(soloMaintainerCheck({ data: { ...base, maintainerCount: 3 } })).toBeNull();
   });
 
   it('should return null when the maintainer count is unknown', () => {
-    expect(soloMaintainerCheck({ ...base, maintainerCount: null })).toBeNull();
+    expect(soloMaintainerCheck({ data: { ...base, maintainerCount: null } })).toBeNull();
   });
 
   it('should return null when there are no maintainers listed', () => {
-    expect(soloMaintainerCheck({ ...base, maintainerCount: 0 })).toBeNull();
+    expect(soloMaintainerCheck({ data: { ...base, maintainerCount: 0 } })).toBeNull();
   });
 });

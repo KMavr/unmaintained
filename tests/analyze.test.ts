@@ -16,6 +16,7 @@ const packageData = (overrides: Partial<PackageData> = {}): PackageData => ({
   openIssues: null,
   closedIssues: null,
   repoCreatedAt: null,
+  scorecardMaintained: null,
   ...overrides,
 });
 
@@ -59,6 +60,17 @@ describe('analyze', () => {
     const finding = analyze(dep, packageData({ lastPublish: '2020-01-01' }), true, now);
     expect(finding.tier).toBe('probably');
     expect(finding.reasons[0]).toMatchObject({ check: 'cadence', confidence: 'soft' });
+  });
+
+  it('should report a low OpenSSF Maintained score as probably unmaintained under --soft', () => {
+    const finding = analyze(
+      dep,
+      packageData({ scorecardMaintained: 1, lastPublish: '2026-06-01' }),
+      true,
+      now,
+    );
+    expect(finding.tier).toBe('probably');
+    expect(finding.reasons[0]).toMatchObject({ check: 'scorecard-maintained', confidence: 'soft' });
   });
 
   it('should ignore soft signals unless --soft is enabled', () => {

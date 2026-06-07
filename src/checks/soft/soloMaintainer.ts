@@ -1,6 +1,6 @@
-import { PackageData, Reason } from '../../types.js';
+import { Reason, SoftCheckInput } from '../../types.js';
 
-export const soloMaintainerCheck = (data: PackageData): Reason | null => {
+export const soloMaintainerCheck = ({ data }: SoftCheckInput): Reason | null => {
   if (data.maintainerCount !== 1) {
     return null;
   }
