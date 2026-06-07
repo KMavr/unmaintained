@@ -3,13 +3,20 @@ import { deprecatedCheck } from './checks/hard/deprecated.js';
 import { unmaintainedTopicCheck } from './checks/hard/unmaintainedTopic.js';
 import { commitAgeCheck } from './checks/soft/commitAge.js';
 import { releaseCadenceCheck } from './checks/soft/releaseCadence.js';
+import { scorecardMaintainedCheck } from './checks/soft/scorecardMaintained.js';
 import { soloMaintainerCheck } from './checks/soft/soloMaintainer.js';
 import { staleIssuesCheck } from './checks/soft/staleIssues.js';
 import type { DirectDependency } from './lib/directDependencies.js';
 import type { Finding, PackageData, Reason, Tier } from './types.js';
 
 const HARD_CHECKS = [deprecatedCheck, archivedCheck, unmaintainedTopicCheck];
-const SOFT_CHECKS = [releaseCadenceCheck, soloMaintainerCheck, commitAgeCheck, staleIssuesCheck];
+const SOFT_CHECKS = [
+  releaseCadenceCheck,
+  soloMaintainerCheck,
+  commitAgeCheck,
+  staleIssuesCheck,
+  scorecardMaintainedCheck,
+];
 
 const getTier = (hardReasonsLength: number, softReasonsLength: number): Tier => {
   if (hardReasonsLength > 0) {
@@ -32,7 +39,7 @@ export const analyze = (
   const hardReasons = HARD_CHECKS.map((check) => check(data)).filter(isValidReason);
 
   const softReasons = soft
-    ? SOFT_CHECKS.map((check) => check(data, now)).filter(isValidReason)
+    ? SOFT_CHECKS.map((check) => check({ data, now })).filter(isValidReason)
     : [];
 
   return {

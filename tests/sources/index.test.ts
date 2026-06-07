@@ -50,6 +50,29 @@ describe('createDefaultSources', () => {
     expect(diagnostics.gitHubRateLimited).toBe(0);
   });
 
+  it('should merge the OpenSSF Maintained score from deps.dev', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('api.deps.dev')) {
+          return {
+            ok: true,
+            json: async () => ({ scorecard: { checks: [{ name: 'Maintained', score: 1 }] } }),
+          };
+        }
+        if (url.includes('api.github.com')) {
+          return { ok: true, json: async () => ({ archived: false, topics: [] }) };
+        }
+        return npmResponse;
+      }),
+    );
+
+    const { sources } = createDefaultSources();
+    const [data] = await sources.fetchPackages(['foo']);
+
+    expect(data.scorecardMaintained).toBe(1);
+  });
+
   it('should batch through the GraphQL endpoint and merge results when a token is provided', async () => {
     const fetchMock = vi.fn(async (url: string) =>
       url.includes('api.github.com/graphql')

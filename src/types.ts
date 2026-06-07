@@ -1,3 +1,5 @@
+import { Thresholds } from './config.js';
+
 export type Tier = 'unmaintained' | 'probably' | 'maintained';
 
 export type Confidence = 'hard' | 'soft';
@@ -49,8 +51,15 @@ export interface PackageData {
   openIssues: number | null;
   closedIssues: number | null;
   repoCreatedAt: string | null;
+  scorecardMaintained: number | null;
 }
 
 export interface Sources {
   fetchPackages(names: string[]): Promise<PackageData[]>;
+}
+
+export interface SoftCheckInput {
+  data: PackageData;
+  now?: Date;
+  thresholds?: Thresholds;
 }
