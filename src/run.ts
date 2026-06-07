@@ -4,6 +4,7 @@ import { directDependencies } from './lib/directDependencies.js';
 import type { DirectDependency } from './lib/directDependencies.js';
 import { PackageJsonError, readPackageJson } from './lib/readPackageJson.js';
 import { renderHuman } from './report/renderHuman.js';
+import { renderJson } from './report/renderJson.js';
 import { createDefaultSources } from './sources/index.js';
 import type { RunOptions } from './types.js';
 
@@ -17,7 +18,7 @@ async function run(options: RunOptions): Promise<number> {
       analyze(dep, data[i], options.soft),
     );
 
-    console.log(renderHuman(findings));
+    console.log(options.json ? renderJson(findings) : renderHuman(findings));
 
     if (diagnostics.gitHubRateLimited > 0) {
       console.error(
