@@ -1,0 +1,18 @@
+{
+  "name": "unmaintained-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A minimal project demonstrating the two tiers `unmaintained` reports.",
+  "scripts": {
+    "scan": "unmaintained",
+    "scan:soft": "unmaintained --soft"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "left-pad": "^1.3.0",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "unmaintained": "file:.."
+  }
+}

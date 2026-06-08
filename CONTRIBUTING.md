@@ -19,10 +19,12 @@ Requires **Node 20+**.
 - `src/index.ts` — CLI entry (commander): the bare `unmaintained` command and its flags.
 - `src/run.ts` — orchestrator: resolve dependencies → analyze → render → exit code.
 - `src/types.ts` / `src/config.ts` — shared types (`Tier`, `Finding`, `Reason`) and default thresholds.
-- `src/lib/*` — manifest reading and dependency resolution (direct vs `--transitive`).
-- `src/sources/*` — injectable data clients (deps.dev, npm registry, GitHub) behind a `Sources` facade.
-- `src/signals/*` — `hard/` (archived, deprecated, unmaintained topic) and `soft/` (commit age, issue
-  staleness, release cadence, solo maintainer, OpenSSF Maintained score).
+- `src/lib/*` — `package.json` reading, dependency resolution (direct vs `--transitive`), and small
+  utilities (`pLimit`, `chunk`).
+- `src/sources/*` — injectable data clients (npm registry, GitHub, deps.dev) behind a `Sources` facade.
+- `src/checks/*` — `hard/` (archived, deprecated, unmaintained topic) and `soft/` (commit age, issue
+  staleness, release cadence, solo maintainer, OpenSSF Maintained score). Each check is a pure function
+  returning a `Reason` or `null` (`null` = no signal).
 - `src/report/*` — human (chalk) and JSON renderers.
 - `tests/` — mirrors `src/`. Sources are injected as fakes, so the suite is fully offline.
 
@@ -30,7 +32,7 @@ Requires **Node 20+**.
 
 - Written with Vitest. **No network in unit tests** — pass fake `Sources` into `analyze`/`run`.
 - Test descriptions start with **"should"** (e.g. `it('should flag an archived repo', …)`).
-- Add tests with every signal, source, or renderer change. Run `npm test -- --run` before pushing.
+- Add tests with every check, source, or renderer change. Run `npm test -- --run` before pushing.
 
 ## Commits & releases
 
