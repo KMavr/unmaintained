@@ -1,6 +1,6 @@
 {
   "name": "unmaintained",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Advisory CI tool that reports which of your dependencies are unmaintained, and which are probably unmaintained.",
   "bin": {
     "unmaintained": "dist/index.js"
