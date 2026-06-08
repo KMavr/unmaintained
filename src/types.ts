@@ -63,3 +63,9 @@ export interface SoftCheckInput {
   now?: Date;
   thresholds?: Thresholds;
 }
+
+export interface DependencyNode {
+  version?: string;
+  dev?: boolean;
+  dependencies?: Record<string, DependencyNode>;
+}

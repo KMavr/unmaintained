@@ -1,7 +1,10 @@
+import { pLimit, type Limiter } from '../lib/pLimit.js';
 import type { Sources } from '../types.js';
 import { fetchDepsDevScores } from './depsDev.js';
 import { fetchGitHubRepo, fetchGitHubReposGraphQL, GitHubRateLimitError } from './github.js';
 import { fetchNpmPackage } from './npmRegistry.js';
+
+const CONCURRENCY = 10;
 
 export interface SourceDiagnostics {
   gitHubRateLimited: number;
@@ -18,15 +21,16 @@ const countingRateLimit = async <T>(
   } catch (error) {
     if (error instanceof GitHubRateLimitError) {
       diagnostics.gitHubRateLimited += count;
-      return fallback;
     }
-    throw error;
+    return fallback;
   }
 };
 
-const fetchPerRepo = (urls: (string | null)[], diagnostics: SourceDiagnostics) =>
+const fetchPerRepo = (urls: (string | null)[], diagnostics: SourceDiagnostics, limit: Limiter) =>
   Promise.all(
-    urls.map((url) => countingRateLimit(diagnostics, 1, null, () => fetchGitHubRepo(url))),
+    urls.map((url) =>
+      limit(() => countingRateLimit(diagnostics, 1, null, () => fetchGitHubRepo(url))),
+    ),
   );
 
 const fetchBatched = (urls: (string | null)[], diagnostics: SourceDiagnostics, token: string) =>
@@ -43,12 +47,13 @@ export const createDefaultSources = (
   const diagnostics: SourceDiagnostics = { gitHubRateLimited: 0 };
   const sources: Sources = {
     fetchPackages: async (names) => {
-      const npmResults = await Promise.all(names.map(fetchNpmPackage));
+      const limit = pLimit(CONCURRENCY);
+      const npmResults = await Promise.all(names.map((name) => limit(() => fetchNpmPackage(name))));
       const urls = npmResults.map(({ repositoryUrl }) => repositoryUrl);
 
       const [repos, scores] = await Promise.all([
-        token ? fetchBatched(urls, diagnostics, token) : fetchPerRepo(urls, diagnostics),
-        fetchDepsDevScores(urls),
+        token ? fetchBatched(urls, diagnostics, token) : fetchPerRepo(urls, diagnostics, limit),
+        fetchDepsDevScores(urls, limit),
       ]);
 
       return npmResults.map((npm, i) => ({

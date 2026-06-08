@@ -8,10 +8,12 @@ const renderGroup = (
   color: ChalkInstance,
 ): string =>
   findings
-    .map(({ name, version, reasons }) => {
+    .map(({ name, version, reasons, path }) => {
       const head = color(`${marker} ${name}@${version} ${label}`);
+      const via =
+        path && path.length > 1 ? `\n    ${chalk.dim(`via ${path.slice(0, -1).join(' › ')}`)}` : '';
       const bullets = reasons.map((reason) => `    • ${reason.detail}`).join('\n');
-      return `${head}\n${bullets}`;
+      return `${head}${via}\n${bullets}`;
     })
     .join('\n\n');
 

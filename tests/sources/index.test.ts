@@ -32,6 +32,39 @@ describe('createDefaultSources', () => {
     expect(diagnostics.gitHubRateLimited).toBe(1);
   });
 
+  it('should degrade to null without crashing when a GitHub request throws', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('api.github.com')) {
+          throw new Error('socket hang up');
+        }
+        return npmResponse;
+      }),
+    );
+
+    const { sources, diagnostics } = createDefaultSources();
+    const [data] = await sources.fetchPackages(['foo']);
+
+    // A thrown request is not a rate-limit, so it degrades silently (no count).
+    expect(data.archived).toBeNull();
+    expect(diagnostics.gitHubRateLimited).toBe(0);
+  });
+
+  it('should degrade to empty data when the npm request throws', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('ECONNRESET');
+      }),
+    );
+
+    const { sources } = createDefaultSources();
+    const [data] = await sources.fetchPackages(['foo']);
+
+    expect(data).toMatchObject({ name: 'foo', latestVersion: null, repositoryUrl: null });
+  });
+
   it('should not count anything when GitHub responds normally', async () => {
     vi.stubGlobal(
       'fetch',
