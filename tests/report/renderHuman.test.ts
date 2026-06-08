@@ -64,4 +64,17 @@ describe('renderHuman', () => {
     expect(output).not.toContain('No unmaintained dependencies found.');
     expect(output).toContain('left-pad@1.3.0 is probably unmaintained');
   });
+
+  it('should show the ancestor chain for a transitive finding', () => {
+    const transitive: Finding = {
+      ...unmaintained,
+      path: ['commander', 'foo', 'request'],
+    };
+    expect(renderHuman([transitive])).toContain('via commander › foo');
+  });
+
+  it('should not show a via line for a direct finding', () => {
+    const direct: Finding = { ...unmaintained, path: ['request'] };
+    expect(renderHuman([direct])).not.toContain('via');
+  });
 });

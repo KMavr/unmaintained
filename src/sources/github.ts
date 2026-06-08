@@ -1,3 +1,5 @@
+import { chunk } from '../lib/chunk.js';
+
 export interface GitHubRepo {
   archived: boolean;
   topics: string[];
@@ -102,7 +104,7 @@ const buildRepositoryQuery = (alias: string, owner: string, repo: string): strin
   }
 `;
 
-export const fetchGitHubReposGraphQL = async (
+const fetchChunk = async (
   repositoryUrls: (string | null)[],
   token: string,
 ): Promise<(GitHubRepo | null)[]> => {
@@ -170,4 +172,13 @@ export const fetchGitHubReposGraphQL = async (
         }
       : null;
   });
+};
+
+const CHUNK_SIZE = 75;
+
+export const fetchGitHubReposGraphQL = async (repositoryUrls: (string | null)[], token: string) => {
+  const batches = await Promise.all(
+    chunk(repositoryUrls, CHUNK_SIZE).map((batch) => fetchChunk(batch, token)),
+  );
+  return batches.flat();
 };

@@ -7,6 +7,7 @@ import { scorecardMaintainedCheck } from './checks/soft/scorecardMaintained.js';
 import { soloMaintainerCheck } from './checks/soft/soloMaintainer.js';
 import { staleIssuesCheck } from './checks/soft/staleIssues.js';
 import type { DirectDependency } from './lib/directDependencies.js';
+import { TransitiveDependency } from './lib/transitiveDependencies.js';
 import type { Finding, PackageData, Reason, Tier } from './types.js';
 
 const HARD_CHECKS = [deprecatedCheck, archivedCheck, unmaintainedTopicCheck];
@@ -31,7 +32,7 @@ const getTier = (hardReasonsLength: number, softReasonsLength: number): Tier => 
 const isValidReason = (reason: Reason | null): reason is Reason => reason !== null;
 
 export const analyze = (
-  dep: DirectDependency,
+  dep: DirectDependency | TransitiveDependency,
   data: PackageData,
   soft: boolean = false,
   now: Date = new Date(),
@@ -42,10 +43,13 @@ export const analyze = (
     ? SOFT_CHECKS.map((check) => check({ data, now })).filter(isValidReason)
     : [];
 
+  const fallbackVersion = 'range' in dep ? dep.range : (dep.version ?? '');
+
   return {
     name: dep.name,
-    version: data.latestVersion ?? dep.range,
+    version: data.latestVersion ?? fallbackVersion,
     tier: getTier(hardReasons.length, softReasons.length),
     reasons: [...hardReasons, ...softReasons],
+    path: 'path' in dep ? dep.path : undefined,
   };
 };

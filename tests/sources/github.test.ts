@@ -232,6 +232,31 @@ describe('fetchGitHubReposGraphQL', () => {
     ]);
   });
 
+  it('should chunk large batches and keep results aligned across the boundary', async () => {
+    // Each chunk is its own query with chunk-local aliases (r0…), so the two
+    // responses are marked differently to prove slot 75 comes from chunk two.
+    const page = (topic: string) => ({
+      ok: true,
+      json: async () => ({
+        data: Object.fromEntries(
+          Array.from({ length: 75 }, (_, i) => [`r${i}`, graphQlNode(false, [topic])]),
+        ),
+      }),
+    });
+    const fetchMock = vi.fn().mockResolvedValueOnce(page('a')).mockResolvedValueOnce(page('b'));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const urls = Array.from({ length: 80 }, (_, i) => `https://github.com/o/r${i}`);
+    const result = await fetchGitHubReposGraphQL(urls, 'tok');
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result).toHaveLength(80);
+    expect(result[0]?.topics).toEqual(['a']);
+    expect(result[74]?.topics).toEqual(['a']);
+    expect(result[75]?.topics).toEqual(['b']);
+    expect(result[79]?.topics).toEqual(['b']);
+  });
+
   it('should throw GitHubRateLimitError on a 403 with no remaining quota', async () => {
     vi.stubGlobal(
       'fetch',

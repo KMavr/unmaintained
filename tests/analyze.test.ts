@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { analyze } from '../src/analyze.js';
 import type { DirectDependency } from '../src/lib/directDependencies.js';
+import type { TransitiveDependency } from '../src/lib/transitiveDependencies.js';
 import type { PackageData } from '../src/types.js';
 
 const packageData = (overrides: Partial<PackageData> = {}): PackageData => ({
@@ -88,5 +89,32 @@ describe('analyze', () => {
     );
     expect(finding.tier).toBe('unmaintained');
     expect(finding.reasons.map((reason) => reason.check)).toEqual(['deprecated', 'cadence']);
+  });
+
+  it('should not attach a path for a direct dependency', () => {
+    const finding = analyze(dep, packageData());
+    expect(finding.path).toBeUndefined();
+  });
+
+  it('should carry the dependency path through for a transitive dependency', () => {
+    const transitive: TransitiveDependency = {
+      name: 'left-pad',
+      version: '1.3.0',
+      dev: false,
+      path: ['commander', 'foo', 'left-pad'],
+    };
+    const finding = analyze(transitive, packageData());
+    expect(finding.path).toEqual(['commander', 'foo', 'left-pad']);
+  });
+
+  it('should fall back to the installed version for a transitive dependency', () => {
+    const transitive: TransitiveDependency = {
+      name: 'left-pad',
+      version: '1.2.9',
+      dev: false,
+      path: ['commander', 'left-pad'],
+    };
+    const finding = analyze(transitive, packageData({ latestVersion: null }));
+    expect(finding.version).toBe('1.2.9');
   });
 });
