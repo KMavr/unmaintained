@@ -8,6 +8,7 @@
 
 - [ ] `fix:` — bug fix (patch)
 - [ ] `feat:` — new feature (minor)
+- [ ] `feat!:` / `fix!:` — breaking change (major)
 - [ ] `docs:` / `chore:` / `test:` / `ci:` / `refactor:` — no release
 
 ## Checklist
@@ -15,5 +16,4 @@
 - [ ] Tests added/updated and `npm test -- --run` passes
 - [ ] `npm run lint`, `npm run typecheck`, and `npm run format:check` pass
 - [ ] Commit messages follow Conventional Commits
-- [ ] If a check, data source, or tier changed, added coverage with injected source fakes (no network in tests)
 - [ ] Updated the README if a flag, exit code, check, or the `--json` output shape changed
