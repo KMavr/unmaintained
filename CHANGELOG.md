@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/KMavr/unmaintained/compare/unmaintained-v0.2.0...unmaintained-v0.3.0) (2026-11-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires Node.js 22 or newer (introduced in #44, whose merge commit release-please could not parse).
+
+### Bug Fixes
+
+* resolve GitHub repos whose name contains a dot ([#49](https://github.com/KMavr/unmaintained/issues/49)) ([26672fe](https://github.com/KMavr/unmaintained/commit/26672fea5984cbae3d55f882a636b5e9a4c6923b))
+
+
+### Continuous Integration
+
+* ignore TypeScript major updates in Dependabot ([#51](https://github.com/KMavr/unmaintained/issues/51)) ([fff9627](https://github.com/KMavr/unmaintained/commit/fff962766c1ac1335b32cd69dd9afa97863ccfbf))
+
 ## [0.2.0](https://github.com/KMavr/unmaintained/compare/unmaintained-v0.1.0...unmaintained-v0.2.0) (2026-06-08)
 
 ### Features
