@@ -58,7 +58,7 @@ yarn unmaintained           # yarn
 
 Every release is published from CI with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) attestations, so each version on npm links back to the exact commit and workflow that built it.
 
-Requires Node.js ≥ 20.
+Requires Node.js ≥ 22.
 
 ## Quickstart
 
@@ -146,7 +146,7 @@ Soft-tier findings never change the exit code, even under `--strict`. And a GitH
 - uses: actions/checkout@v4
 - uses: actions/setup-node@v4
   with:
-    node-version: 20
+    node-version: 24
 - run: npm ci
 - name: Report unmaintained dependencies
   run: npx unmaintained --soft

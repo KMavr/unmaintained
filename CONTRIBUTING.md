@@ -12,7 +12,7 @@ npm run lint       # eslint
 npm run typecheck  # tsc --noEmit
 ```
 
-Requires **Node 20+**.
+Requires **Node 22+**.
 
 ## Project layout
 
@@ -49,4 +49,4 @@ Requires **Node 20+**.
 npm run lint && npm run typecheck && npm run format:check && npm test -- --run
 ```
 
-These are the same checks CI runs on Node 20, 22, and 24.
+These are the same checks CI runs on Node 22, 24, and 26.
