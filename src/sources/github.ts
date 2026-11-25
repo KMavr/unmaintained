@@ -19,7 +19,7 @@ const throwIfRateLimited = (res: Response, message: string): void => {
 };
 
 export const parseRepo = (repositoryUrl: string): { owner: string; repo: string } | null => {
-  const match = repositoryUrl.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
+  const match = repositoryUrl.match(/github\.com[/:]([^/]+)\/([^/#?]+?)(?:\.git)?(?:[/#?].*)?$/);
   return match ? { owner: match[1], repo: match[2] } : null;
 };
 

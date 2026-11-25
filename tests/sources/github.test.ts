@@ -3,10 +3,27 @@ import {
   fetchGitHubRepo,
   fetchGitHubReposGraphQL,
   GitHubRateLimitError,
+  parseRepo,
 } from '../../src/sources/github.js';
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe('parseRepo', () => {
+  it.each([
+    ['git+https://github.com/tj/commander.js.git', 'tj', 'commander.js'],
+    ['https://github.com/tj/commander.js', 'tj', 'commander.js'],
+    ['git@github.com:socketio/socket.io.git', 'socketio', 'socket.io'],
+    ['https://github.com/foo/bar#readme', 'foo', 'bar'],
+    ['https://github.com/foo/bar/issues', 'foo', 'bar'],
+  ])('should parse %s', (url, owner, repo) => {
+    expect(parseRepo(url)).toEqual({ owner, repo });
+  });
+
+  it('should return null for a non-GitHub url', () => {
+    expect(parseRepo('https://gitlab.com/foo/bar')).toBeNull();
+  });
 });
 
 describe('fetchGitHubRepo', () => {
