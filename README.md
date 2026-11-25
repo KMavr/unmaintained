@@ -3,6 +3,11 @@
 [![CI](https://github.com/KMavr/unmaintained/actions/workflows/ci.yml/badge.svg)](https://github.com/KMavr/unmaintained/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/unmaintained.svg)](https://www.npmjs.com/package/unmaintained)
 [![npm downloads](https://img.shields.io/npm/dm/unmaintained.svg)](https://www.npmjs.com/package/unmaintained)
+[![unpacked size](https://img.shields.io/npm/unpacked-size/unmaintained.svg)](https://www.npmjs.com/package/unmaintained)
+[![node](https://img.shields.io/node/v/unmaintained.svg)](https://www.npmjs.com/package/unmaintained)
+[![license](https://img.shields.io/npm/l/unmaintained.svg)](./LICENSE)
+[![types](https://img.shields.io/npm/types/unmaintained.svg)](https://www.npmjs.com/package/unmaintained)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 > Report which of your dependencies are unmaintained — and which are _probably_ unmaintained — as an advisory check, the way `npm audit` warns at install time.
 
