@@ -15,10 +15,10 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "test": "vitest",
-    "lint": "eslint src",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write src",
-    "format:check": "prettier --check src",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "node -e \"if (process.env.CI) process.exit(0)\" && husky",
     "prepack": "npm run build && npm run lint && npm run typecheck && npm test -- --run"
   },
